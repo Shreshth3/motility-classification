@@ -1,3 +1,4 @@
+# %% imports
 import os
 import os.path as op
 from pathlib   import Path
@@ -10,9 +11,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
-###################################################
-# !!! Remember to look at data_dictionary.txt !!! #
-###################################################
+# %%
 
 
 # Set your target file here #######################
