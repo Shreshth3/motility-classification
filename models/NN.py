@@ -1,7 +1,22 @@
-# %%
-print("hello world")
+import numpy as np
+import matplotlib.pyplot as plt
 
-# %%
-print("woah this is cool")
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torchvision import datasets, transforms
 
-print("ur mother lol")
+import os
+import os.path as op
+from pathlib   import Path
+from glob      import glob
+from tqdm      import tqdm
+from datetime  import datetime
+
+import csv
+import json
+
+
+
+
+# insert model here lmfao
