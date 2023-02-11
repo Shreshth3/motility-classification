@@ -3,8 +3,7 @@
 # coding: utf-8
 
 # In[1]:
-import os
-import os.path as op
+import os, sys
 from pathlib   import Path
 from glob      import glob
 from tqdm      import tqdm
@@ -15,14 +14,17 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
+parent_dir = os.path.abspath('..')
+sys.path.append(parent_dir)
 from utils import *
 
 # %%
 
 # Constants
-TYPE = "train"
+TYPE = "test"
+# TYPE = "train"
 # DATA_LOCATION = '../input/2023-cs155-proj1/train.json'
-DATA_LOCATION = f'./data/{TYPE}.json'
+DATA_LOCATION = f'../data/{TYPE}.json'
 
 # In[2]:
 
@@ -260,7 +262,7 @@ def squared_residual_sum(coords):
 FEATURE_LIST = [mean_step_speed, stddev_step_speed, track_length, e2e_distance, duration, squared_residual_sum]
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 # OUTPUT_FILENAME = f"/kaggle/working/{TYPE}_features_{TIMESTAMP}.csv"
-OUTPUT_FILENAME = f"./data/{TYPE}_features_{TIMESTAMP}.csv"
+OUTPUT_FILENAME = f"../data/{TYPE}_features_{TIMESTAMP}.csv"
 
 
 # Generate the feature csv
