@@ -70,3 +70,25 @@ def output_csv(model, filename, test_data):
     export_df[1] = pd.to_numeric(export_df[1], downcast='integer')
 
     export_df.to_csv(filename, header=["UID", "label"], index=False)
+
+def get_misclassified_points(model, test_loader):
+    all_misclassified_points = []
+
+    for data, target in test_loader:
+        output = model(data)
+        pred = torch.round(output)
+        pred = pred.squeeze()
+
+        is_misclassified = pred != target
+
+        cur_batch_misclassified_points = data[is_misclassified]
+        all_misclassified_points.extend([*cur_batch_misclassified_points])
+
+    return all_misclassified_points
+
+"""
+TODO:
+-write function to grab IDs
+-plot from the IDs
+"""
+
