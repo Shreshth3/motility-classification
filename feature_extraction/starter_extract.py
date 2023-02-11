@@ -211,6 +211,25 @@ def duration(coords):
 ######################################
 
 
+def deviation_from_line(coords):
+    """Name of the Feature
+
+    A short description of the feature goes here. Equations can be useful.
+
+    Parameters
+    ----------
+    coords: array
+        A numpy array containing the (t, x, y) coordinates of the track.
+
+    Returns
+    -------
+    float
+        The feature value for the entire array.
+
+    """
+
+    return 0
+
 # ## Implementing Feature cont.
 #
 # Implementing more features will follow the same pattern as the functions above. You will either:
