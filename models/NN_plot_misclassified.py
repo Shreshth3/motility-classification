@@ -120,10 +120,14 @@ print('Test set: Average loss: %.4f, Accuracy: %d/%d (%.4f)' %
 #%%
 
 all_misclassified_points = get_misclassified_points(model, test_loader)
-print(all_misclassified_points[:5])
+# print(all_misclassified_points[:5])
 
-
-
+misclassified_IDs = []
+# print(all_misclassified_points)
+for point_tensor in all_misclassified_points:
+    for test_point in test_loader.dataset:
+        if torch.eq(point_tensor, test_point):
+            misclassified_IDs.append(test_point)
 # %%
 
 output_csv(model, OUTPUT_FILE_PATH, TEST_BASIC_FEATURES_PATH)
