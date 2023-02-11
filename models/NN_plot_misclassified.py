@@ -5,6 +5,7 @@ parent_dir = os.path.abspath('..')
 sys.path.append(parent_dir)
 # 
 
+import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset
@@ -15,7 +16,7 @@ from sklearn.model_selection import train_test_split
 from datetime  import datetime
 from tqdm      import tqdm
 
-from utils import process_data, output_csv
+from utils import process_data, output_csv, get_misclassified_points
 
 #%%
 # Hyperparameters
@@ -37,13 +38,12 @@ X_train, y_train = process_data(TRAIN_BASIC_FEATURES_PATH)
 
 X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.95)
 
-
 train_dataset = TensorDataset(X_train, y_train)
 test_dataset = TensorDataset(X_test, y_test)
 
 #%%
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True) 
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
+test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE) 
 
 #%%
 model = nn.Sequential(
@@ -118,14 +118,9 @@ print('Test set: Average loss: %.4f, Accuracy: %d/%d (%.4f)' %
        100. * correct / len(test_loader.dataset)))
 
 #%%
-for data, target in test_loader:
-    output = model(data)
-    pred = torch.round(output)
 
-    print(data[0])
-    print(pred[:5])
-    print(target[:5])
-    break
+all_misclassified_points = get_misclassified_points(model, test_loader)
+print(all_misclassified_points[:5])
 
 
 

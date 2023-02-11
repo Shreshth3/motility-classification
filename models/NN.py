@@ -33,7 +33,7 @@ To figure out:
 # Hyperparameters
 LEARNING_RATE = 1e-3
 BATCH_SIZE = 32
-NUM_EPOCHS = 10
+NUM_EPOCHS = 2
 
 INPUT_SIZE = 5
 OUTPUT_SIZE = 1
@@ -46,7 +46,7 @@ OUTPUT_FILE_PATH = f'../output/{TIMESTAMP}_output.csv'
 
 X_train, y_train = process_data(TRAIN_BASIC_FEATURES_PATH)
 
-X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.2)
+X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.99)
 
 
 # print(len(X_train))
