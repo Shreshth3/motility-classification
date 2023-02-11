@@ -1,4 +1,10 @@
 #%%
+# DO THIS TO INCLUDE UTILS
+import os, sys
+parent_dir = os.path.abspath('..')
+sys.path.append(parent_dir)
+# 
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -6,23 +12,15 @@ import pandas as pd
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torchvision import datasets, transforms
 from torch.utils.data import TensorDataset
 
 from sklearn.model_selection import train_test_split
 
-import os
-import os.path as op
-from pathlib   import Path
-from glob      import glob
 from tqdm      import tqdm
 from datetime  import datetime
 
-import csv
-import json
-
 from utils import process_data, output_csv
+
 
 #%%
 # Hyperparameters
@@ -33,11 +31,11 @@ NUM_EPOCHS = 10
 INPUT_SIZE = 5
 OUTPUT_SIZE = 1
 
-TRAIN_BASIC_FEATURES_PATH = 'data/train_basic_features.csv'
-TEST_BASIC_FEATURES_PATH = 'data/test_basic_features.csv'
+TRAIN_BASIC_FEATURES_PATH = '../data/train_basic_features.csv'
+TEST_BASIC_FEATURES_PATH = '../data/test_basic_features.csv'
 
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
-OUTPUT_FILE_PATH = f'output/{TIMESTAMP}_output.csv'
+OUTPUT_FILE_PATH = f'../output/{TIMESTAMP}_output.csv'
 
 X_train, y_train = process_data(TRAIN_BASIC_FEATURES_PATH)
 
@@ -112,8 +110,8 @@ zeros = 0
 with torch.no_grad():
     for data, target in test_loader:
         output = model(data)
-        test_loss += loss_fn(output, target.unsqueeze(dim=-1)).item()
         pred = torch.round(output)
+        test_loss += loss_fn(pred, target.unsqueeze(dim=-1)).item()
         correct += pred.eq(target.view_as(pred)).sum().item()
 
 test_loss /= len(test_loader.dataset)

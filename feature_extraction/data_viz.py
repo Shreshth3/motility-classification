@@ -91,3 +91,17 @@ plot_uids = random.choices(sim_motile_uids, k=100)
 to_plot = [np.array(train_data[u]['txy']) for u in plot_uids]
 
 plot_tracks(to_plot, 'Lab Motile Tracks')
+# %%
+
+def plot_polar_tracks(tracklist, title):
+    # plot given tracks
+    fig, ax = plt.subplots(figsize=(5,5), subplot_kw={'projection': 'polar'})
+    for t in tracklist:
+        ax.plot(t[:,1], t[:,2])
+    
+    ax.set_xlim([0,1024])
+    ax.set_ylim([1024, 0])
+    ax.set_aspect(1.0)
+    ax.set_title(title)
+    
+    fig.show()
