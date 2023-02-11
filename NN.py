@@ -26,7 +26,7 @@ from utils import process_data
 
 #%%
 # Hyperparameters
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 1e-3
 BATCH_SIZE = 32
 NUM_EPOCHS = 10
 
@@ -36,9 +36,12 @@ OUTPUT_SIZE = 1
 TRAIN_BASIC_FEATURES_PATH = 'data/train_basic_features.csv'
 TEST_BASIC_FEATURES_PATH = 'data/test_basic_features.csv'
 
-X, y = process_data(TRAIN_BASIC_FEATURES_PATH)
+X_train, y_train = process_data(TRAIN_BASIC_FEATURES_PATH)
+X_test, y_test = process_data(TEST_BASIC_FEATURES_PATH)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+print(X_test[:10])
+print(y_test[:10])
+#X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.05)
 
 train_dataset = TensorDataset(X_train, y_train)
 test_dataset = TensorDataset(X_test, y_test)
@@ -104,6 +107,7 @@ model.eval()
 
 test_loss = 0
 correct = 0
+zeros = 0
 
 # Turning off automatic differentiation
 with torch.no_grad():
@@ -114,6 +118,8 @@ with torch.no_grad():
         correct += pred.eq(target.view_as(pred)).sum().item()
 
 test_loss /= len(test_loader.dataset)
+
+print(zeros)
 
 print('Test set: Average loss: %.4f, Accuracy: %d/%d (%.4f)' %
       (test_loss, correct, len(test_loader.dataset),
