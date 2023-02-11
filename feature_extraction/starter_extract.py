@@ -1,3 +1,4 @@
+#%%
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -14,12 +15,14 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
+from utils import *
+
 # %%
 
 # Constants
 TYPE = "train"
 # DATA_LOCATION = '../input/2023-cs155-proj1/train.json'
-DATA_LOCATION = f'../data/{TYPE}.json'
+DATA_LOCATION = f'./data/{TYPE}.json'
 
 # In[2]:
 
@@ -209,12 +212,11 @@ def duration(coords):
 ######################################
 # Implement your own features below! #
 ######################################
+#%%
+def squared_residual_sum(coords):
+    """Squared residual sum.
 
-
-def deviation_from_line(coords):
-    """Name of the Feature
-
-    A short description of the feature goes here. Equations can be useful.
+    Sum of squared residuals w.r.t line of best fit.
 
     Parameters
     ----------
@@ -228,8 +230,17 @@ def deviation_from_line(coords):
 
     """
 
-    return 0
+    X = np.expand_dims(coords[:, 1], axis=1)
+    y = coords[:, 2]
 
+    line_of_best_fit = compute_line_of_best_fit(X, y)
+    residuals = compute_residuals(X, y, line_of_best_fit)
+
+    squared_residuals = np.square(residuals)
+
+    return np.sum(squared_residuals)
+
+#%%
 # ## Implementing Feature cont.
 #
 # Implementing more features will follow the same pattern as the functions above. You will either:
@@ -246,10 +257,10 @@ def deviation_from_line(coords):
 
 # In[4]:
 
-FEATURE_LIST = [mean_step_speed, stddev_step_speed, track_length, e2e_distance, duration]
+FEATURE_LIST = [mean_step_speed, stddev_step_speed, track_length, e2e_distance, duration, squared_residual_sum]
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 # OUTPUT_FILENAME = f"/kaggle/working/{TYPE}_features_{TIMESTAMP}.csv"
-OUTPUT_FILENAME = f"../data/{TYPE}_features_{TIMESTAMP}.csv"
+OUTPUT_FILENAME = f"./data/{TYPE}_features_{TIMESTAMP}.csv"
 
 
 # Generate the feature csv
