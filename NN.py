@@ -22,7 +22,7 @@ from datetime  import datetime
 import csv
 import json
 
-from utils import process_data
+from utils import process_data, output_csv
 
 #%%
 # Hyperparameters
@@ -36,12 +36,12 @@ OUTPUT_SIZE = 1
 TRAIN_BASIC_FEATURES_PATH = 'data/train_basic_features.csv'
 TEST_BASIC_FEATURES_PATH = 'data/test_basic_features.csv'
 
+TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
+OUTPUT_FILE_PATH = f'output/{TIMESTAMP}_output.csv'
+
 X_train, y_train = process_data(TRAIN_BASIC_FEATURES_PATH)
-X_test, y_test = process_data(TEST_BASIC_FEATURES_PATH)
 
 X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.2)
-print(X_train[0])
-print(y_test[0])
 
 
 train_dataset = TensorDataset(X_train, y_train)
@@ -121,5 +121,9 @@ test_loss /= len(test_loader.dataset)
 print('Test set: Average loss: %.4f, Accuracy: %d/%d (%.4f)' %
       (test_loss, correct, len(test_loader.dataset),
        100. * correct / len(test_loader.dataset)))
+
+# %%
+
+output_csv(model, OUTPUT_FILE_PATH, TEST_BASIC_FEATURES_PATH)
 
 # %%
