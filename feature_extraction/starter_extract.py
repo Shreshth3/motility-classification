@@ -242,6 +242,40 @@ def squared_residual_sum(coords):
 
     return np.sum(squared_residuals)
 
+def outside_bounds(coords):
+    """checks if a point ever leaves "bounds" 
+
+    Parameters
+    ---------
+    coords: array
+        A numpy array containing the (t, x, y) coordinates of the track.
+
+    Returns
+    ---------
+    int
+        1/0 if a point ever leaves the bounds
+    """
+    x_start = coords[0][1]
+    x_end = coords[0][1]
+
+    x_min = min(x_start, x_end)
+    x_max = max(x_start, x_end)
+
+    y_start = coords[0][2]
+    y_end = coords[0][2]
+
+    y_min = min(y_start, y_end)
+    y_max = max(y_start, y_end)
+
+    for i in range(1, coords.shape[0]):
+        x_point = coords[i][0]
+        y_point = coords[i][1]
+        if ((x_point > x_max) or (x_point < x_min) or (y_point > y_max) or (y_point < y_min)):
+            return 1
+    return 0
+
+
+
 #%%
 # ## Implementing Feature cont.
 #
