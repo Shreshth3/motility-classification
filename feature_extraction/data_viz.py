@@ -12,7 +12,7 @@ import random
 # In[2]:
 
 # DATA_LOCATION = '../input/2023-cs155-proj1/train.json'
-DATA_LOCATION = 'data/train.json'
+DATA_LOCATION = '../data/train.json'
 
 # Load the training data
 with open(DATA_LOCATION, 'r') as f:
@@ -44,9 +44,9 @@ def plot_tracks(tracklist, title):
 
 # In[4]:
 
-
+'''
 # Plot 10 simulated motile tracks
-plot_uids = random.choices(sim_motile_uids, k=5)
+plot_uids = random.choices(sim_motile_uids, k=10)
 to_plot = [np.array(train_data[u]['txy']) for u in plot_uids]
 
 plot_tracks(to_plot, 'Simulated Motile Tracks')
@@ -56,23 +56,25 @@ plot_uids = random.choices(sim_nonmotile_uids, k=5)
 to_plot = [np.array(train_data[u]['txy']) for u in plot_uids]
 
 plot_tracks(to_plot, 'Simulated Nonmotile Tracks')
-
+'''
 
 # In[5]:
 
-
-# Plot 10 lab motile tracks
-plot_uids = random.choices(lab_motile_uids, k=5)
-to_plot = [np.array(train_data[u]['txy']) for u in plot_uids]
+# Plot lab motile tracks
+# plot_uids = random.choices(lab_motile_uids, k=10)
+to_plot = [np.array(train_data[u]['txy']) for u in lab_motile_uids]
 
 plot_tracks(to_plot, 'Lab Motile Tracks')
 
-# Plot 10 lab nonmotile tracks
-plot_uids = random.choices(lab_nonmotile_uids, k=5)
-to_plot = [np.array(train_data[u]['txy']) for u in plot_uids]
+# Plot lab nonmotile tracks
+# plot_uids = random.choices(lab_nonmotile_uids, k=10)
+to_plot = [np.array(train_data[u]['txy']) for u in lab_nonmotile_uids]
 
 plot_tracks(to_plot, 'Lab Nonmotile Tracks')
 
 
 # In[ ]:
 
+print(len(lab_nonmotile_uids))
+
+# %%
