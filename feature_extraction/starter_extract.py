@@ -1,9 +1,9 @@
+#%%
 #!/usr/bin/env python
 # coding: utf-8
 
 # In[1]:
-import os
-import os.path as op
+import os, sys
 from pathlib   import Path
 from glob      import glob
 from tqdm      import tqdm
@@ -14,10 +14,15 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
+parent_dir = os.path.abspath('..')
+sys.path.append(parent_dir)
+from utils import *
+
 # %%
 
 # Constants
-TYPE = "train"
+TYPE = "test"
+# TYPE = "train"
 # DATA_LOCATION = '../input/2023-cs155-proj1/train.json'
 DATA_LOCATION = f'../data/{TYPE}.json'
 
@@ -209,8 +214,69 @@ def duration(coords):
 ######################################
 # Implement your own features below! #
 ######################################
+#%%
+def squared_residual_sum(coords):
+    """Squared residual sum.
+
+    Sum of squared residuals w.r.t line of best fit.
+
+    Parameters
+    ----------
+    coords: array
+        A numpy array containing the (t, x, y) coordinates of the track.
+
+    Returns
+    -------
+    float
+        The feature value for the entire array.
+
+    """
+
+    X = np.expand_dims(coords[:, 1], axis=1)
+    y = coords[:, 2]
+
+    line_of_best_fit = compute_line_of_best_fit(X, y)
+    residuals = compute_residuals(X, y, line_of_best_fit)
+
+    squared_residuals = np.square(residuals)
+
+    return np.sum(squared_residuals)
+
+def outside_bounds(coords):
+    """checks if a point ever leaves "bounds" 
+
+    Parameters
+    ---------
+    coords: array
+        A numpy array containing the (t, x, y) coordinates of the track.
+
+    Returns
+    ---------
+    int
+        1/0 if a point ever leaves the bounds
+    """
+    x_start = coords[0][1]
+    x_end = coords[0][1]
+
+    x_min = min(x_start, x_end)
+    x_max = max(x_start, x_end)
+
+    y_start = coords[0][2]
+    y_end = coords[0][2]
+
+    y_min = min(y_start, y_end)
+    y_max = max(y_start, y_end)
+
+    for i in range(1, coords.shape[0]):
+        x_point = coords[i][0]
+        y_point = coords[i][1]
+        if ((x_point > x_max) or (x_point < x_min) or (y_point > y_max) or (y_point < y_min)):
+            return 1
+    return 0
 
 
+
+#%%
 # ## Implementing Feature cont.
 #
 # Implementing more features will follow the same pattern as the functions above. You will either:
@@ -227,7 +293,7 @@ def duration(coords):
 
 # In[4]:
 
-FEATURE_LIST = [mean_step_speed, stddev_step_speed, track_length, e2e_distance, duration]
+FEATURE_LIST = [mean_step_speed, stddev_step_speed, track_length, e2e_distance, duration, squared_residual_sum]
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 # OUTPUT_FILENAME = f"/kaggle/working/{TYPE}_features_{TIMESTAMP}.csv"
 OUTPUT_FILENAME = f"../data/{TYPE}_features_{TIMESTAMP}.csv"
