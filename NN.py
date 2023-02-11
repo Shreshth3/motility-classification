@@ -40,8 +40,10 @@ X_train, y_train = process_data(TRAIN_BASIC_FEATURES_PATH)
 X_test, y_test = process_data(TEST_BASIC_FEATURES_PATH)
 
 X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.2)
-print(X_train[0])
-print(y_test[0])
+
+
+print(len(X_train))
+print(len(X_test))
 
 
 train_dataset = TensorDataset(X_train, y_train)
