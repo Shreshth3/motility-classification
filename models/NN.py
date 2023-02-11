@@ -15,12 +15,19 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset
 
 from sklearn.model_selection import train_test_split
+from torchmetrics.classification import BinaryFBetaScore
 
 from tqdm      import tqdm
 from datetime  import datetime
 
 from utils import process_data, output_csv
 
+"""
+To figure out:
+-incorporate new feature
+-make output of model be predictions
+-F2
+"""
 
 #%%
 # Hyperparameters
@@ -73,6 +80,7 @@ model = nn.Sequential(
 
 optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 loss_fn = nn.BCELoss()
+F2_loss = BinaryFBetaScore(beta=2.0) # F2 loss
 
 #%%
 # Training loop
@@ -111,7 +119,7 @@ with torch.no_grad():
     for data, target in test_loader:
         output = model(data)
         pred = torch.round(output)
-        test_loss += loss_fn(pred, target.unsqueeze(dim=-1)).item()
+        test_loss += F2_loss(pred, target.unsqueeze(dim=-1)).item()
         correct += pred.eq(target.view_as(pred)).sum().item()
 
 test_loss /= len(test_loader.dataset)
@@ -123,5 +131,6 @@ print('Test set: Average loss: %.4f, Accuracy: %d/%d (%.4f)' %
 # %%
 
 output_csv(model, OUTPUT_FILE_PATH, TEST_BASIC_FEATURES_PATH)
+
 
 # %%
