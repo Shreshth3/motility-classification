@@ -311,9 +311,7 @@ def mean_squared_angle_sum(coords):
     angle_values = np.array(angle_values)
     squared_angle_values = np.square(angle_values) # We do this so that everything is positive
 
-    squared_angle_sum = np.sum(squared_angle_values)
-
-    return np.mean(squared_angle_sum)
+    return np.mean(squared_angle_values)
 
 
 #%%
