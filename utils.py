@@ -18,18 +18,30 @@ from datetime  import datetime
 import csv
 import json
 
+
+
 from sklearn.linear_model import LinearRegression
 
 def df_to_tensor(df):
     return torch.Tensor(df.to_numpy())
 
 
-def process_data(csv):
+def process_data(csv, columns_to_drop=['uid', 'label'], return_uids=False):
     df = pd.read_csv(csv)
+    # df = df[df['uid'].str.contains('sim') == False]
+    print(len(df))
+
+    print(df[len(df)-5:])
 
     df.dropna(inplace=True)
     Y = df['label'].copy()
-    df.drop(columns=['uid', 'label'], inplace=True)
+    df.drop(columns=columns_to_drop, inplace=True)
+
+
+    if return_uids:
+        uids = df.pop('uid')
+
+        return df_to_tensor(df), torch.FloatTensor(Y.to_numpy()), np.array(uids)
 
     return df_to_tensor(df), torch.FloatTensor(Y.to_numpy())
 
@@ -71,6 +83,19 @@ def output_csv(model, filename, test_data):
 
     export_df.to_csv(filename, header=["UID", "label"], index=False)
 
+def plot_tracks(tracklist, title):
+    # plot given tracks
+    fig, ax = plt.subplots(figsize=(5,5))
+    for t in tracklist:
+        ax.plot(t[:,1], t[:,2])
+    
+    ax.set_xlim([-500,1250])
+    ax.set_ylim([1250, -500])
+    ax.set_aspect(1.0)
+    ax.set_title(title)
+    
+    fig.show()
+
 def get_misclassified_points(model, test_loader):
     all_misclassified_points = []
 
@@ -86,9 +111,34 @@ def get_misclassified_points(model, test_loader):
 
     return all_misclassified_points
 
-"""
-TODO:
--write function to grab IDs
--plot from the IDs
-"""
+def compute_vector(point_one, point_two):
+    x1, y1 = point_one
+    x2, y2 = point_two
+
+    return np.array([x2 - x1, y2 - y1])
+
+def compute_angle(v1, v2):
+    dot = np.dot(v1, v2)
+
+    v1_magnitude = np.linalg.norm(v1)
+    v2_magnitude = np.linalg.norm(v2)
+
+    if v1_magnitude == 0 or v2_magnitude == 0:
+        return 0
+
+    cos_angle = dot / (v1_magnitude * v2_magnitude)
+
+    # There are some edge cases where we get
+    # -1.0000000000000002 which
+    # is not in the domain of arccos
+    cos_angle = min(cos_angle, 1.0)
+    cos_angle = max(cos_angle, -1.0)
+
+    angle_in_rad = np.arccos(cos_angle)
+
+    angle_in_deg = np.degrees(angle_in_rad)
+
+    return angle_in_deg
+
+
 

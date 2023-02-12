@@ -215,10 +215,10 @@ def duration(coords):
 # Implement your own features below! #
 ######################################
 #%%
-def squared_residual_sum(coords):
-    """Squared residual sum.
+def mean_squared_residual_sum(coords):
+    """Mean squared residual sum.
 
-    Sum of squared residuals w.r.t line of best fit.
+    Mean of sum of squared residuals w.r.t line of best fit.
 
     Parameters
     ----------
@@ -240,7 +240,9 @@ def squared_residual_sum(coords):
 
     squared_residuals = np.square(residuals)
 
-    return np.sum(squared_residuals)
+    squared_residual_sum = np.sum(squared_residuals)
+
+    return np.mean(squared_residual_sum)
 
 def outside_bounds(coords):
     """checks if a point ever leaves "bounds" 
@@ -274,6 +276,44 @@ def outside_bounds(coords):
             return 1
     return 0
 
+def mean_squared_angle_sum(coords):
+    """Mean squared angle sum.
+
+    For each triple of points (a,b,c),
+    compute angle between (a,b) and (b,c).
+    Then, square and sum all of these. Take mean of that.
+
+    Parameters
+    ----------
+    coords: array
+        A numpy array containing the (t, x, y) coordinates of the track.
+
+    Returns
+    -------
+    float
+        The feature value for the entire array.
+
+    """
+    coords = coords[:, 1:]
+    angle_values = []
+
+    for i in range(len(coords) - 2):
+        a = coords[i]
+        b = coords[i + 1]
+        c = coords[i + 2]
+
+        v1 = compute_vector(a, b)
+        v2 = compute_vector(b, c)
+
+        angle = compute_angle(v1, v2)
+        angle_values.append(angle)
+
+    angle_values = np.array(angle_values)
+    squared_angle_values = np.square(angle_values) # We do this so that everything is positive
+
+    squared_angle_sum = np.sum(squared_angle_values)
+
+    return np.mean(squared_angle_sum)
 
 
 #%%
@@ -293,7 +333,7 @@ def outside_bounds(coords):
 
 # In[4]:
 
-FEATURE_LIST = [mean_step_speed, stddev_step_speed, track_length, e2e_distance, duration, squared_residual_sum]
+FEATURE_LIST = [mean_step_speed, stddev_step_speed, track_length, e2e_distance, duration, mean_squared_residual_sum, mean_squared_angle_sum]
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 # OUTPUT_FILENAME = f"/kaggle/working/{TYPE}_features_{TIMESTAMP}.csv"
 OUTPUT_FILENAME = f"../data/{TYPE}_features_{TIMESTAMP}.csv"
@@ -327,4 +367,4 @@ with open(OUTPUT_FILENAME, 'w') as f:
 print("Written to:", OUTPUT_FILENAME)
 
 
-# %%
+#%%

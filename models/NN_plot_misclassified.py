@@ -16,7 +16,10 @@ from sklearn.model_selection import train_test_split
 from datetime  import datetime
 from tqdm      import tqdm
 
-from utils import process_data, output_csv, get_misclassified_points
+import json
+
+
+from utils import process_data, output_csv, get_misclassified_points, plot_tracks
 
 #%%
 # Hyperparameters
@@ -122,7 +125,21 @@ print('Test set: Average loss: %.4f, Accuracy: %d/%d (%.4f)' %
 all_misclassified_points = get_misclassified_points(model, test_loader)
 print(all_misclassified_points[:5])
 
+misclassified_point_ids = ['lab_0_6', 'lab_5_28', 'sim_12_3']
 
+DATA_LOCATION = '../data/train.json'
+
+# Load the training data
+with open(DATA_LOCATION, 'r') as f:
+    train_data = json.load(f)
+
+tracks_to_plot = [np.array(train_data[u]['txy']) for u in misclassified_point_ids]
+
+plot_tracks(misclassified_point_ids, 'All misclassified tracks')
+# TODO: split into motile vs nonmotile
+
+
+# to_plot = [np.array(train_data[u]['txy']) for u in lab_motile_uids]
 
 # %%
 

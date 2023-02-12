@@ -2,12 +2,15 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+
+
 # In[1]:
 get_ipython().run_line_magic('matplotlib', 'inline')
 import json
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+
 
 
 # In[2]:
@@ -31,8 +34,6 @@ lab_nonmotile_uids = [x for x in train_data.keys() if train_data[x]['label'] == 
 
 
 # In[3]:
-
-
 def plot_tracks(tracklist, title):
     # plot given tracks
     fig, ax = plt.subplots(figsize=(5,5))
@@ -45,6 +46,8 @@ def plot_tracks(tracklist, title):
     ax.set_title(title)
     
     fig.show()
+
+
 
 
 # In[4]:

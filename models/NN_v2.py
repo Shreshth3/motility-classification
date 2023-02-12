@@ -12,20 +12,25 @@ from torch.utils.data import TensorDataset
 from torchmetrics.classification import BinaryFBetaScore
 from sklearn.model_selection import train_test_split
 
+import numpy as np
+
 from datetime  import datetime
 from tqdm      import tqdm
 
-from utils import process_data, output_csv
+from utils import process_data, output_csv, plot_tracks
+import json
 
 #%%
 # Hyperparameters
 LEARNING_RATE = 1e-3
 BATCH_SIZE = 32
-NUM_EPOCHS = 5
+NUM_EPOCHS = 10
 
 INPUT_SIZE = 6
 OUTPUT_SIZE = 1
 
+# /Users/shreshth/Documents/Caltech/cs/cs155/motility-classification/data/train_features_20230211_151647.csv
+# /Users/shreshth/Documents/Caltech/cs/cs155/motility-classification/data/test_features_20230211_152003.csv
 
 TRAIN_BASIC_FEATURES_PATH = '../data/train_features_20230210_201924.csv'
 TEST_BASIC_FEATURES_PATH = '../data/test_features_20230210_202031.csv'
@@ -35,12 +40,14 @@ OUTPUT_FILE_PATH = f'../output/{TIMESTAMP}_output.csv'
 
 X_train, y_train = process_data(TRAIN_BASIC_FEATURES_PATH)
 
-X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.95)
+X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.2)
 
 
 train_dataset = TensorDataset(X_train, y_train)
 test_dataset = TensorDataset(X_test, y_test)
 
+# MAKE SURE TO ADD shuffle=True IF YOU'RE
+# GOING TO SUBMIT
 #%%
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True) 
@@ -49,19 +56,9 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE, s
 model = nn.Sequential(
     nn.Flatten(),
 
-    nn.Linear(INPUT_SIZE, 550),
+    nn.Linear(INPUT_SIZE, 50),
     nn.ReLU(),
     nn.Dropout(0.3),
-
-    nn.Linear(550, 250),
-    nn.ReLU(),
-
-    nn.Linear(250, 100),
-    nn.ReLU(),
-    nn.Dropout(0.2),
-
-    nn.Linear(100, 50),
-    nn.ReLU(),
 
     nn.Linear(50, OUTPUT_SIZE),
     nn.Sigmoid()
@@ -117,6 +114,7 @@ print('Test set: Average loss: %.4f, Accuracy: %d/%d (%.4f)' %
       (test_loss, correct, len(test_loader.dataset),
        100. * correct / len(test_loader.dataset)))
 
+# run from here
 #%%
 for data, target in test_loader:
     output = model(data)
@@ -130,6 +128,55 @@ for data, target in test_loader:
 
 
 # %%
+MOTILE = 1
+NONMOTILE = 0
+
+X_train, y_train, uids = process_data(TRAIN_BASIC_FEATURES_PATH, columns_to_drop=['label'], return_uids=True)
+num_examples = 2048
+idx = len(X_train) - num_examples
+print(f'X_train length: {len(X_train)}')
+print(f'num examples examined: {num_examples}')
+
+X_train = X_train[idx:]
+y_train = y_train[idx:]
+uids = uids[idx:]
+
+output = model(X_train)
+pred = torch.round(output)
+
+is_misclassified = pred.squeeze() != y_train
+misclassified_uids = uids[is_misclassified]
+
+print(f'Num misclassified: {len(misclassified_uids)}')
+
+misclassified_labels = y_train[is_misclassified]
+
+misclassified_motile_indices = misclassified_labels.int() == MOTILE
+misclassified_nonmotile_indices = misclassified_labels.int() != MOTILE
+
+print('of those...')
+print(f'{misclassified_motile_indices.sum()} are motile and')
+print(f'{misclassified_nonmotile_indices.sum()} are nonmotile')
+
+misclassified_motile_uids = misclassified_uids[misclassified_motile_indices]
+misclassified_nonmotile_uids = misclassified_uids[misclassified_nonmotile_indices]
+
+num_lab_misclassified = sum([1 if 'lab' in uid else 0 for uid in misclassified_uids])
+num_sim_misclassified = sum([1 if 'sim' in uid else 0 for uid in misclassified_uids])
+print(f'of the misclassified uids, {num_lab_misclassified} were lab samples and {num_sim_misclassified} were sim samples')
+
+
+DATA_LOCATION = '../data/train.json'
+
+# Load the training data
+with open(DATA_LOCATION, 'r') as f:
+    train_data = json.load(f)
+
+misclassified_motile_tracks = [np.array(train_data[u]['txy']) for u in misclassified_motile_uids]
+misclassified_nonmotile_tracks = [np.array(train_data[u]['txy']) for u in misclassified_nonmotile_uids]
+
+plot_tracks(misclassified_motile_tracks, 'Misclassified motile particles')
+plot_tracks(misclassified_nonmotile_tracks, 'Misclassified nonmotile particles')
 
 output_csv(model, OUTPUT_FILE_PATH, TEST_BASIC_FEATURES_PATH)
 
