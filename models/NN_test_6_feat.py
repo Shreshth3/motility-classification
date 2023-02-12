@@ -26,14 +26,11 @@ LEARNING_RATE = 1e-3
 BATCH_SIZE = 32
 NUM_EPOCHS = 10
 
-INPUT_SIZE = 7
+INPUT_SIZE = 6
 OUTPUT_SIZE = 1
 
-# /Users/shreshth/Documents/Caltech/cs/cs155/motility-classification/data/train_features_20230211_151647.csv
-# /Users/shreshth/Documents/Caltech/cs/cs155/motility-classification/data/test_features_20230211_152003.csv
-
-TRAIN_BASIC_FEATURES_PATH = '../data/train_features_20230211_175449.csv'
-TEST_BASIC_FEATURES_PATH = '../data/test_features_20230211_175307.csv'
+TRAIN_BASIC_FEATURES_PATH = '../data/train_6_feat.csv'
+TEST_BASIC_FEATURES_PATH = '../data/test_6_feat.csv'
 
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 OUTPUT_FILE_PATH = f'../output/{TIMESTAMP}_output.csv'
