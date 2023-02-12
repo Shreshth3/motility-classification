@@ -217,10 +217,10 @@ def duration(coords):
 # Implement your own features below! #
 ######################################
 #%%
-def squared_residual_sum(coords):
-    """Squared residual sum.
+def mean_squared_residual(coords):
+    """Mean squared residual.
 
-    Sum of squared residuals w.r.t line of best fit.
+    Mean of squared residuals w.r.t line of best fit.
 
     Parameters
     ----------
@@ -242,7 +242,7 @@ def squared_residual_sum(coords):
 
     squared_residuals = np.square(residuals)
 
-    return np.sum(squared_residuals)
+    return np.mean(squared_residuals)
 
 def outside_bounds(coords):
     """checks if a point ever leaves "bounds" 
@@ -356,7 +356,7 @@ def delta_max_speed(coords):
 
 # In[4]:
 
-FEATURE_LIST = [mean_step_speed, stddev_step_speed, track_length, e2e_distance, duration, squared_residual_sum, outside_bounds, delta_max_speed]
+FEATURE_LIST = [mean_step_speed, stddev_step_speed, track_length, e2e_distance, duration, squared_residual_sum, outside_bounds, mean_squared_angle_sum, delta_max_speed]
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 # OUTPUT_FILENAME = f"/kaggle/working/{TYPE}_features_{TIMESTAMP}.csv"
 OUTPUT_FILENAME = f"../data/{TYPE}_features_{TIMESTAMP}.csv"
