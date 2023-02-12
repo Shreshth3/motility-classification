@@ -211,14 +211,16 @@ def duration(coords):
     return end_t - start_t
 
 
+
+
 ######################################
 # Implement your own features below! #
 ######################################
 #%%
-def mean_squared_residual_sum(coords):
-    """Mean squared residual sum.
+def squared_residual_sum(coords):
+    """Squared residual sum.
 
-    Mean of sum of squared residuals w.r.t line of best fit.
+    Sum of squared residuals w.r.t line of best fit.
 
     Parameters
     ----------
@@ -240,9 +242,7 @@ def mean_squared_residual_sum(coords):
 
     squared_residuals = np.square(residuals)
 
-    squared_residual_sum = np.sum(squared_residuals)
-
-    return np.mean(squared_residual_sum)
+    return np.sum(squared_residuals)
 
 def outside_bounds(coords):
     """checks if a point ever leaves "bounds" 
@@ -313,6 +313,24 @@ def mean_squared_angle_sum(coords):
 
     return np.mean(squared_angle_values)
 
+def delta_max_speed(coords):
+    speeds = []
+
+    for i in range(1, coords.shape[0]):
+        # Previous coordinate location
+        prev = coords[i-1, 1:]
+        # Current coordinate location
+        curr = coords[i, 1:]
+
+        # Speed in pixels per frame
+        curr_speed = np.linalg.norm(curr - prev)
+
+        # Accumulate per-step speeds into a list
+        speeds.append(curr_speed)
+
+    # Return the standard deviation of the speeds
+    return np.max(speeds)
+    
 
 #%%
 # ## Implementing Feature cont.
@@ -331,7 +349,7 @@ def mean_squared_angle_sum(coords):
 
 # In[4]:
 
-FEATURE_LIST = [mean_step_speed, stddev_step_speed, track_length, e2e_distance, duration, mean_squared_residual_sum, mean_squared_angle_sum]
+FEATURE_LIST = [mean_step_speed, stddev_step_speed, track_length, e2e_distance, duration, squared_residual_sum, outside_bounds, delta_max_speed]
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 # OUTPUT_FILENAME = f"/kaggle/working/{TYPE}_features_{TIMESTAMP}.csv"
 OUTPUT_FILENAME = f"../data/{TYPE}_features_{TIMESTAMP}.csv"
@@ -365,4 +383,4 @@ with open(OUTPUT_FILENAME, 'w') as f:
 print("Written to:", OUTPUT_FILENAME)
 
 
-#%%
+# %%
