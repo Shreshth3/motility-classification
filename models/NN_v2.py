@@ -26,14 +26,14 @@ LEARNING_RATE = 1e-3
 BATCH_SIZE = 32
 NUM_EPOCHS = 10
 
-INPUT_SIZE = 6
+INPUT_SIZE = 7
 OUTPUT_SIZE = 1
 
 # /Users/shreshth/Documents/Caltech/cs/cs155/motility-classification/data/train_features_20230211_151647.csv
 # /Users/shreshth/Documents/Caltech/cs/cs155/motility-classification/data/test_features_20230211_152003.csv
 
-TRAIN_BASIC_FEATURES_PATH = '../data/train_features_20230210_201924.csv'
-TEST_BASIC_FEATURES_PATH = '../data/test_features_20230210_202031.csv'
+TRAIN_BASIC_FEATURES_PATH = '../data/train_features_20230211_175449.csv'
+TEST_BASIC_FEATURES_PATH = '../data/test_features_20230211_175307.csv'
 
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 OUTPUT_FILE_PATH = f'../output/{TIMESTAMP}_output.csv'
@@ -56,9 +56,19 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE, s
 model = nn.Sequential(
     nn.Flatten(),
 
-    nn.Linear(INPUT_SIZE, 50),
+    nn.Linear(INPUT_SIZE, 550),
     nn.ReLU(),
     nn.Dropout(0.3),
+
+    nn.Linear(550, 250),
+    nn.ReLU(),
+
+    nn.Linear(250, 100),
+    nn.ReLU(),
+    nn.Dropout(0.2),
+
+    nn.Linear(100, 50),
+    nn.ReLU(),
 
     nn.Linear(50, OUTPUT_SIZE),
     nn.Sigmoid()

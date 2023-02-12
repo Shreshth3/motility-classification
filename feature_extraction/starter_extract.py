@@ -21,8 +21,8 @@ from utils import *
 # %%
 
 # Constants
-TYPE = "test"
-# TYPE = "train"
+# TYPE = "test"
+TYPE = "train"
 # DATA_LOCATION = '../input/2023-cs155-proj1/train.json'
 DATA_LOCATION = f'../data/{TYPE}.json'
 
@@ -308,10 +308,16 @@ def mean_squared_angle_sum(coords):
         angle = compute_angle(v1, v2)
         angle_values.append(angle)
 
+    if (angle_values == []):
+        return 0
     angle_values = np.array(angle_values)
     squared_angle_values = np.square(angle_values) # We do this so that everything is positive
 
-    return np.mean(squared_angle_values)
+    ret = np.mean(squared_angle_values)
+    # if (np.isnan(ret)):
+    #     print(squared_angle_values)
+    #     print(np.mean(squared_angle_values))
+    return ret
 
 
 #%%
