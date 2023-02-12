@@ -320,6 +320,9 @@ def mean_squared_angle_sum(coords):
     return ret
 
 def delta_max_speed(coords):
+    """
+    max speed 
+    """
     max_speed = 0
 
     for i in range(1, coords.shape[0]):
@@ -337,6 +340,25 @@ def delta_max_speed(coords):
 
     # Return the standard deviation of the speeds
     return max_speed
+
+def percentage_moving(coords):
+    speed_frames = 0
+
+    for i in range(1, coords.shape[0]):
+        # Previous coordinate location
+        prev = coords[i-1, 1:]
+        # Current coordinate location
+        curr = coords[i, 1:]
+
+        # Speed in pixels per frame
+        curr_speed = np.linalg.norm(curr - prev)
+
+        # Accumulate per-step speeds into a list
+        if curr_speed <= 0.001:
+            speed_frames += 1
+
+    # Return the standard deviation of the speeds
+    return speed_frames / coords.shape[0]
     
 
 #%%
@@ -356,7 +378,7 @@ def delta_max_speed(coords):
 
 # In[4]:
 
-FEATURE_LIST = [mean_step_speed, stddev_step_speed, track_length, e2e_distance, duration, mean_squared_residual, outside_bounds, mean_squared_angle_sum, delta_max_speed]
+FEATURE_LIST = [mean_step_speed, stddev_step_speed, track_length, e2e_distance, duration, mean_squared_residual, outside_bounds, mean_squared_angle_sum, delta_max_speed, percentage_moving]
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 # OUTPUT_FILENAME = f"/kaggle/working/{TYPE}_features_{TIMESTAMP}.csv"
 OUTPUT_FILENAME = f"../data/{TYPE}_features_{TIMESTAMP}.csv"
