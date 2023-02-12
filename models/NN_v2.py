@@ -35,7 +35,7 @@ OUTPUT_FILE_PATH = f'../output/{TIMESTAMP}_output.csv'
 
 X_train, y_train = process_data(TRAIN_BASIC_FEATURES_PATH)
 
-X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.95)
+X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.2)
 
 
 train_dataset = TensorDataset(X_train, y_train)
@@ -51,14 +51,14 @@ model = nn.Sequential(
 
     nn.Linear(INPUT_SIZE, 550),
     nn.ReLU(),
-    nn.Dropout(0.3),
+    #nn.Dropout(0.3),
 
     nn.Linear(550, 250),
     nn.ReLU(),
 
     nn.Linear(250, 100),
     nn.ReLU(),
-    nn.Dropout(0.2),
+    #nn.Dropout(0.2),
 
     nn.Linear(100, 50),
     nn.ReLU(),
@@ -67,8 +67,14 @@ model = nn.Sequential(
     nn.Sigmoid()
 )
 
+def torch_f2_loss(output, target):
+    prod = output * target
+    #print(prod)
+    #print(torch.min(2 * prod + 3 * output - target + 1))
+    return torch.sum(1 - 5 * prod / (2 * prod + 3 * output - target + 1 + 1e-10))
+
 optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
-loss_fn = nn.BCELoss()
+loss_fn = torch_f2_loss
 F2_loss = BinaryFBetaScore(beta=2.0) # F2 loss
 
 #%%
