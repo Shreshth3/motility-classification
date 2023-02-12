@@ -21,8 +21,8 @@ from utils import *
 # %%
 
 # Constants
-# TYPE = "test"
-TYPE = "train"
+TYPE = "test"
+# TYPE = "train"
 # DATA_LOCATION = '../input/2023-cs155-proj1/train.json'
 DATA_LOCATION = f'../data/{TYPE}.json'
 
