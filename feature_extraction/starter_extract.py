@@ -356,7 +356,7 @@ def delta_max_speed(coords):
 
 # In[4]:
 
-FEATURE_LIST = [mean_step_speed, stddev_step_speed, track_length, e2e_distance, duration, squared_residual_sum, outside_bounds, mean_squared_angle_sum, delta_max_speed]
+FEATURE_LIST = [mean_step_speed, stddev_step_speed, track_length, e2e_distance, duration, mean_squared_residual, outside_bounds, mean_squared_angle_sum, delta_max_speed]
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 # OUTPUT_FILENAME = f"/kaggle/working/{TYPE}_features_{TIMESTAMP}.csv"
 OUTPUT_FILENAME = f"../data/{TYPE}_features_{TIMESTAMP}.csv"
