@@ -320,7 +320,7 @@ def mean_squared_angle_sum(coords):
     return ret
 
 def delta_max_speed(coords):
-    speeds = []
+    max_speed = 0
 
     for i in range(1, coords.shape[0]):
         # Previous coordinate location
@@ -332,10 +332,11 @@ def delta_max_speed(coords):
         curr_speed = np.linalg.norm(curr - prev)
 
         # Accumulate per-step speeds into a list
-        speeds.append(curr_speed)
+        if curr_speed > max_speed:
+            max_speed = curr_speed
 
     # Return the standard deviation of the speeds
-    return np.max(speeds)
+    return max_speed
     
 
 #%%
