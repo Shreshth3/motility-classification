@@ -21,8 +21,8 @@ from utils import *
 # %%
 
 # Constants
-TYPE = "test"
-# TYPE = "train"
+# TYPE = "test"
+TYPE = "train"
 # DATA_LOCATION = '../input/2023-cs155-proj1/train.json'
 DATA_LOCATION = f'../data/{TYPE}.json'
 
@@ -211,14 +211,16 @@ def duration(coords):
     return end_t - start_t
 
 
+
+
 ######################################
 # Implement your own features below! #
 ######################################
 #%%
-def squared_residual_sum(coords):
-    """Squared residual sum.
+def mean_squared_residual(coords):
+    """Mean squared residual.
 
-    Sum of squared residuals w.r.t line of best fit.
+    Mean of squared residuals w.r.t line of best fit.
 
     Parameters
     ----------
@@ -240,7 +242,7 @@ def squared_residual_sum(coords):
 
     squared_residuals = np.square(residuals)
 
-    return np.sum(squared_residuals)
+    return np.mean(squared_residuals)
 
 def outside_bounds(coords):
     """checks if a point ever leaves "bounds" 
@@ -274,7 +276,68 @@ def outside_bounds(coords):
             return 1
     return 0
 
+def mean_squared_angle_sum(coords):
+    """Mean squared angle sum.
 
+    For each triple of points (a,b,c),
+    compute angle between (a,b) and (b,c).
+    Then, square and sum all of these. Take mean of that.
+
+    Parameters
+    ----------
+    coords: array
+        A numpy array containing the (t, x, y) coordinates of the track.
+
+    Returns
+    -------
+    float
+        The feature value for the entire array.
+
+    """
+    coords = coords[:, 1:]
+    angle_values = []
+
+    for i in range(len(coords) - 2):
+        a = coords[i]
+        b = coords[i + 1]
+        c = coords[i + 2]
+
+        v1 = compute_vector(a, b)
+        v2 = compute_vector(b, c)
+
+        angle = compute_angle(v1, v2)
+        angle_values.append(angle)
+
+    if (angle_values == []):
+        return 0
+    angle_values = np.array(angle_values)
+    squared_angle_values = np.square(angle_values) # We do this so that everything is positive
+
+    ret = np.mean(squared_angle_values)
+    # if (np.isnan(ret)):
+    #     print(squared_angle_values)
+    #     print(np.mean(squared_angle_values))
+    return ret
+
+def delta_max_speed(coords):
+    max_speed = 0
+
+    for i in range(1, coords.shape[0]):
+        # Previous coordinate location
+        prev = coords[i-1, 1:]
+        # Current coordinate location
+        curr = coords[i, 1:]
+
+        # Speed in pixels per frame
+        curr_speed = np.linalg.norm(curr - prev)
+
+        # Accumulate per-step speeds into a list
+        if curr_speed > max_speed:
+            max_speed = curr_speed
+
+    # Return the standard deviation of the speeds
+    return max_speed
+    
 
 #%%
 # ## Implementing Feature cont.
@@ -293,7 +356,7 @@ def outside_bounds(coords):
 
 # In[4]:
 
-FEATURE_LIST = [mean_step_speed, stddev_step_speed, track_length, e2e_distance, duration, squared_residual_sum]
+FEATURE_LIST = [mean_step_speed, stddev_step_speed, track_length, e2e_distance, duration, mean_squared_residual, outside_bounds, mean_squared_angle_sum, delta_max_speed]
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 # OUTPUT_FILENAME = f"/kaggle/working/{TYPE}_features_{TIMESTAMP}.csv"
 OUTPUT_FILENAME = f"../data/{TYPE}_features_{TIMESTAMP}.csv"

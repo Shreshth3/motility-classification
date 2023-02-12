@@ -5,7 +5,6 @@ parent_dir = os.path.abspath('..')
 sys.path.append(parent_dir)
 # 
 
-import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset
@@ -13,40 +12,42 @@ from torch.utils.data import TensorDataset
 from torchmetrics.classification import BinaryFBetaScore
 from sklearn.model_selection import train_test_split
 
+import numpy as np
+
 from datetime  import datetime
 from tqdm      import tqdm
 
+from utils import process_data, output_csv, plot_tracks
 import json
-
-
-from utils import process_data, output_csv, get_misclassified_points, plot_tracks
 
 #%%
 # Hyperparameters
 LEARNING_RATE = 1e-3
 BATCH_SIZE = 32
-NUM_EPOCHS = 5
+NUM_EPOCHS = 10
 
 INPUT_SIZE = 6
 OUTPUT_SIZE = 1
 
-
-TRAIN_BASIC_FEATURES_PATH = '../data/train_features_20230210_201924.csv'
-TEST_BASIC_FEATURES_PATH = '../data/test_features_20230210_202031.csv'
+TRAIN_BASIC_FEATURES_PATH = '../data/train_6_feat.csv'
+TEST_BASIC_FEATURES_PATH = '../data/test_6_feat.csv'
 
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 OUTPUT_FILE_PATH = f'../output/{TIMESTAMP}_output.csv'
 
 X_train, y_train = process_data(TRAIN_BASIC_FEATURES_PATH)
 
-X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.95)
+X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.2)
+
 
 train_dataset = TensorDataset(X_train, y_train)
 test_dataset = TensorDataset(X_test, y_test)
 
+# MAKE SURE TO ADD shuffle=True IF YOU'RE
+# GOING TO SUBMIT
 #%%
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE) 
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True) 
 
 #%%
 model = nn.Sequential(
@@ -120,12 +121,57 @@ print('Test set: Average loss: %.4f, Accuracy: %d/%d (%.4f)' %
       (test_loss, correct, len(test_loader.dataset),
        100. * correct / len(test_loader.dataset)))
 
+# run from here
 #%%
+for data, target in test_loader:
+    output = model(data)
+    pred = torch.round(output)
 
-all_misclassified_points = get_misclassified_points(model, test_loader)
-print(all_misclassified_points[:5])
+    print(data[0])
+    print(pred[:5])
+    print(target[:5])
+    break
 
-misclassified_point_ids = ['lab_0_6', 'lab_5_28', 'sim_12_3']
+
+
+# %%
+MOTILE = 1
+NONMOTILE = 0
+
+X_train, y_train, uids = process_data(TRAIN_BASIC_FEATURES_PATH, columns_to_drop=['label'], return_uids=True)
+num_examples = 2048
+idx = len(X_train) - num_examples
+print(f'X_train length: {len(X_train)}')
+print(f'num examples examined: {num_examples}')
+
+X_train = X_train[idx:]
+y_train = y_train[idx:]
+uids = uids[idx:]
+
+output = model(X_train)
+pred = torch.round(output)
+
+is_misclassified = pred.squeeze() != y_train
+misclassified_uids = uids[is_misclassified]
+
+print(f'Num misclassified: {len(misclassified_uids)}')
+
+misclassified_labels = y_train[is_misclassified]
+
+misclassified_motile_indices = misclassified_labels.int() == MOTILE
+misclassified_nonmotile_indices = misclassified_labels.int() != MOTILE
+
+print('of those...')
+print(f'{misclassified_motile_indices.sum()} are motile and')
+print(f'{misclassified_nonmotile_indices.sum()} are nonmotile')
+
+misclassified_motile_uids = misclassified_uids[misclassified_motile_indices]
+misclassified_nonmotile_uids = misclassified_uids[misclassified_nonmotile_indices]
+
+num_lab_misclassified = sum([1 if 'lab' in uid else 0 for uid in misclassified_uids])
+num_sim_misclassified = sum([1 if 'sim' in uid else 0 for uid in misclassified_uids])
+print(f'of the misclassified uids, {num_lab_misclassified} were lab samples and {num_sim_misclassified} were sim samples')
+
 
 DATA_LOCATION = '../data/train.json'
 
@@ -133,22 +179,11 @@ DATA_LOCATION = '../data/train.json'
 with open(DATA_LOCATION, 'r') as f:
     train_data = json.load(f)
 
-tracks_to_plot = [np.array(train_data[u]['txy']) for u in misclassified_point_ids]
+misclassified_motile_tracks = [np.array(train_data[u]['txy']) for u in misclassified_motile_uids]
+misclassified_nonmotile_tracks = [np.array(train_data[u]['txy']) for u in misclassified_nonmotile_uids]
 
-plot_tracks(misclassified_point_ids, 'All misclassified tracks')
-# TODO: split into motile vs nonmotile
-
-
-# to_plot = [np.array(train_data[u]['txy']) for u in lab_motile_uids]
-# print(all_misclassified_points[:5])
-
-misclassified_IDs = []
-# print(all_misclassified_points)
-for point_tensor in all_misclassified_points:
-    for test_point in test_loader.dataset:
-        if torch.eq(point_tensor, test_point):
-            misclassified_IDs.append(test_point)
-# %%
+plot_tracks(misclassified_motile_tracks, 'Misclassified motile particles')
+plot_tracks(misclassified_nonmotile_tracks, 'Misclassified nonmotile particles')
 
 output_csv(model, OUTPUT_FILE_PATH, TEST_BASIC_FEATURES_PATH)
 
