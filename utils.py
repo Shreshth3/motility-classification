@@ -135,6 +135,3 @@ def compute_angle(v1, v2):
     angle_in_deg = np.degrees(angle_in_rad)
 
     return angle_in_deg
-
-
-
