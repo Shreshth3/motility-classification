@@ -23,7 +23,6 @@ from sklearn.linear_model import LinearRegression
 def df_to_tensor(df):
     return torch.Tensor(df.to_numpy())
 
-
 def process_data(csv, columns_to_drop=['uid', 'label'], return_uids=False):
     df = pd.read_csv(csv)
     # df = df[df['uid'].str.contains('sim') == False]
