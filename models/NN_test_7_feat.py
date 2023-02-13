@@ -7,7 +7,7 @@ sys.path.append(parent_dir)
 
 import torch
 import torch.nn as nn
-from torch.utils.data import TensorDataset
+from torch.utils.data import TensorDataset, WeightedRandomSampler
 
 from torchmetrics.classification import BinaryFBetaScore
 from sklearn.model_selection import train_test_split
@@ -24,7 +24,7 @@ import json
 # Hyperparameters
 LEARNING_RATE = 1e-3
 BATCH_SIZE = 32
-NUM_EPOCHS = 10
+NUM_EPOCHS = 50
 
 INPUT_SIZE = 7
 OUTPUT_SIZE = 1
@@ -39,6 +39,12 @@ X_train, y_train = process_data(TRAIN_BASIC_FEATURES_PATH)
 
 X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.2)
 
+ones = torch.sum(y_train).item() / len(y_train)
+
+weights = np.array([ones if t == 0 else 1 - ones for t in y_train])
+
+weights = torch.from_numpy(weights)
+sampler = WeightedRandomSampler(weights.type('torch.FloatTensor'), len(weights))
 
 train_dataset = TensorDataset(X_train, y_train)
 test_dataset = TensorDataset(X_test, y_test)
@@ -46,33 +52,49 @@ test_dataset = TensorDataset(X_test, y_test)
 # MAKE SURE TO ADD shuffle=True IF YOU'RE
 # GOING TO SUBMIT
 #%%
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE, sampler=sampler)
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True) 
 
 #%%
 model = nn.Sequential(
     nn.Flatten(),
-
     nn.Linear(INPUT_SIZE, 550),
     nn.ReLU(),
     nn.Dropout(0.3),
 
     nn.Linear(550, 250),
     nn.ReLU(),
+    nn.Dropout(0.25),
 
     nn.Linear(250, 100),
     nn.ReLU(),
     nn.Dropout(0.2),
 
-    nn.Linear(100, 50),
+    nn.Linear(100, 100),
     nn.ReLU(),
 
-    nn.Linear(50, OUTPUT_SIZE),
+    nn.Linear(100, OUTPUT_SIZE),
     nn.Sigmoid()
 )
 
+def torch_f2_loss(output, target):
+    tp = torch.sum(output * target).to(torch.float32)
+    # tn = torch.sum((1 - output) * (1-target))
+    fp = torch.sum((1 - output) * target).to(torch.float32)
+    fn = torch.sum(output * (1 - target)).to(torch.float32)
+
+    p = tp / (tp + fp + 1e-7)
+    r = tp / (tp + fn + 1e-7)
+
+    f1 = 5 * p * r / (4 * p + r + 1e-7)
+    f1 = torch.where(torch.isnan(f1), torch.zeros_like(f1), f1)
+
+    return 1 - torch.mean(f1)
+
 optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+#loss_fn = AsymmetricLoss(gamma_neg=2, gamma_pos=1, clip=0,disable_torch_grad_focal_loss=True)
 loss_fn = nn.BCELoss()
+#loss_fn = torch_f2_loss
 F2_loss = BinaryFBetaScore(beta=2.0) # F2 loss
 
 #%%
@@ -80,6 +102,9 @@ F2_loss = BinaryFBetaScore(beta=2.0) # F2 loss
 model.train()
 
 for epoch in range(NUM_EPOCHS):
+    train_loss = 0
+    correct = 0
+
     for batch_idx, (data, target) in enumerate(train_loader):
         # Erase accumulated gradients
         optimizer.zero_grad()
@@ -90,14 +115,22 @@ for epoch in range(NUM_EPOCHS):
         # Calculate loss
         loss = loss_fn(output, target.unsqueeze(dim=-1))
 
+        pred = torch.round(output)
+
+        train_loss += F2_loss(pred, target.unsqueeze(dim=-1)).item()
+
+        correct += pred.eq(target.view_as(pred)).sum().item()
+
         # Backward pass
         loss.backward()
         
         # Weight update
         optimizer.step()
+    
+    train_loss /= len(train_loader.dataset)
 
     # Track loss each epoch
-    print('Train Epoch: %d  Loss: %.4f' % (epoch + 1,  loss.item()))
+    print('Train Epoch: %d  Loss: %.4f Average loss: %.4f, Accuracy: %d/%d (%.4f)' % (epoch + 1, loss.item(), train_loss, correct, len(train_loader.dataset), 100. * correct / len(train_loader.dataset)))
 
 #%%
 
@@ -117,7 +150,7 @@ with torch.no_grad():
 
 test_loss /= len(test_loader.dataset)
 
-print('Test set: Average loss: %.4f, Accuracy: %d/%d (%.4f)' %
+print('Test Set: Average loss: %.4f, Accuracy: %d/%d (%.4f)' %
       (test_loss, correct, len(test_loader.dataset),
        100. * correct / len(test_loader.dataset)))
 

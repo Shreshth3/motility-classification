@@ -29,9 +29,9 @@ def df_to_tensor(df):
 def process_data(csv, columns_to_drop=['uid', 'label'], return_uids=False):
     df = pd.read_csv(csv)
     # df = df[df['uid'].str.contains('sim') == False]
-    print(len(df))
+    #print(len(df))
 
-    print(df[len(df)-5:])
+    #print(df[len(df)-5:])
 
     df.dropna(inplace=True)
     Y = df['label'].copy()
