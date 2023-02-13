@@ -24,7 +24,7 @@ import json
 # Hyperparameters
 LEARNING_RATE = 1e-3
 BATCH_SIZE = 32
-NUM_EPOCHS = 50
+NUM_EPOCHS = 10
 
 INPUT_SIZE = 7
 OUTPUT_SIZE = 1
@@ -173,7 +173,6 @@ misclassified_nonmotile_uids = misclassified_uids[misclassified_nonmotile_indice
 num_lab_misclassified = sum([1 if 'lab' in uid else 0 for uid in misclassified_uids])
 num_sim_misclassified = sum([1 if 'sim' in uid else 0 for uid in misclassified_uids])
 print(f'of the misclassified uids, {num_lab_misclassified} were lab samples and {num_sim_misclassified} were sim samples')
-
 
 DATA_LOCATION = '../data/train.json'
 

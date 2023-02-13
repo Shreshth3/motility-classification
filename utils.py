@@ -18,8 +18,6 @@ from datetime  import datetime
 import csv
 import json
 
-
-
 from sklearn.linear_model import LinearRegression
 
 def df_to_tensor(df):
@@ -36,7 +34,6 @@ def process_data(csv, columns_to_drop=['uid', 'label'], return_uids=False):
     df.dropna(inplace=True)
     Y = df['label'].copy()
     df.drop(columns=columns_to_drop, inplace=True)
-
 
     if return_uids:
         uids = df.pop('uid')
