@@ -24,7 +24,7 @@ import json
 # Hyperparameters
 LEARNING_RATE = 1e-3
 BATCH_SIZE = 32
-NUM_EPOCHS = 10
+NUM_EPOCHS = 20
 
 INPUT_SIZE = 7
 OUTPUT_SIZE = 1
